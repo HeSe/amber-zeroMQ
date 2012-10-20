@@ -129,17 +129,17 @@ category: 'not yet classified',
 fn: function (aZMQSocketType) {
     var self = this;
     var $1, $2, $3, $4, $5, $6, $7;
-    $1 = smalltalk.send(aZMQSocketType, "__eq", ["SUB"]);
+    $1 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.SUB || SUB]);
     if (smalltalk.assert($1)) {
         $2 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQSubSocket || ZMQSubSocket, "_newOnContext_", [self])]);
         return $2;
     }
-    $3 = smalltalk.send(aZMQSocketType, "__eq", ["REQ"]);
+    $3 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.REQ || REQ]);
     if (smalltalk.assert($3)) {
         $4 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQReqSocket || ZMQReqSocket, "_newOnContext_", [self])]);
         return $4;
     }
-    $5 = smalltalk.send(aZMQSocketType, "__eq", ["REP"]);
+    $5 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.REP || REP]);
     if (smalltalk.assert($5)) {
         $6 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQRepSocket || ZMQRepSocket, "_newOnContext_", [self])]);
         return $6;
@@ -148,9 +148,9 @@ fn: function (aZMQSocketType) {
     return $7;
 },
 args: ["aZMQSocketType"],
-source: "createNewSocket: aZMQSocketType\x0a\x0a   aZMQSocketType = 'SUB'\x0a   \x09\x09ifTrue:[ ^self registerNewSocket: ( ZMQSubSocket newOnContext: self )  ].\x0a  \x0a   aZMQSocketType = 'REQ'\x0a   \x09\x09ifTrue:[ ^self registerNewSocket: ( ZMQReqSocket newOnContext: self )  ].\x0a        \x0a   aZMQSocketType = 'REP'\x0a   \x09\x09ifTrue:[ ^self registerNewSocket:  ( ZMQRepSocket newOnContext: self ) ].\x0a        \x0a    ^self error: 'SocketType not yet supported'\x0a   \x0a   \x0a",
+source: "createNewSocket: aZMQSocketType\x0a\x0a   aZMQSocketType = SUB\x0a   \x09\x09ifTrue:[ ^self registerNewSocket: ( ZMQSubSocket newOnContext: self )  ].\x0a  \x0a   aZMQSocketType = REQ\x0a   \x09\x09ifTrue:[ ^self registerNewSocket: ( ZMQReqSocket newOnContext: self )  ].\x0a        \x0a   aZMQSocketType = REP\x0a   \x09\x09ifTrue:[ ^self registerNewSocket:  ( ZMQRepSocket newOnContext: self ) ].\x0a        \x0a    ^self error: 'SocketType not yet supported'\x0a   \x0a   \x0a",
 messageSends: ["ifTrue:", "registerNewSocket:", "newOnContext:", "=", "error:"],
-referencedClasses: ["ZMQSubSocket", "ZMQReqSocket", "ZMQRepSocket"]
+referencedClasses: ["ZMQSubSocket", "SUB", "ZMQReqSocket", "REQ", "ZMQRepSocket", "REP"]
 }),
 smalltalk.ZMQContext);
 
@@ -179,13 +179,13 @@ selector: "initialize",
 category: 'not yet classified',
 fn: function () {
     var self = this;
-    self['@zmqSockets'] = smalltalk.send(smalltalk.Array || Array, "_new", []);
+    self['@zmqSockets'] = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     return self;
 },
 args: [],
-source: "initialize\x0a\x0a\x09zmqSockets := Array new.",
+source: "initialize\x0a\x0a\x09zmqSockets := Dictionary new.",
 messageSends: ["new"],
-referencedClasses: ["Array"]
+referencedClasses: ["Dictionary"]
 }),
 smalltalk.ZMQContext);
 
@@ -235,12 +235,12 @@ category: 'not yet classified',
 fn: function () {
     var self = this;
     var $2, $3, $1;
-    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(msg, "_data", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_handle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq_eq_eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
+    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(msg, "_data", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_primHandle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq_eq_eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
     return $1;
 },
 args: [],
-source: "onMessageWSOverrideBlock\x0a\x0a\x09^ [: msg |    | mMsgObj mSocket |\x0a                      \x0a                    mMsgObj := JSON parse: msg data .\x0a    \x0a\x09 \x09\x09\x09\x09mSocket := (self sockets at: (mMsgObj at: 'identity')).\x0a     \x0a\x09\x09\x09\x09\x09mSocket connected\x0a    \x09\x09\x09\x09\x09\x09ifTrue:[  mSocket  handle: (mMsgObj at:'content')]\x0a\x09\x09\x09\x09\x09\x09\x09ifFalse:[  ((mMsgObj at: 'msg_type' ) === 'connection_reply')\x0a        \x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].\x0a                          \x0a        ].\x0a                         \x0a                         ",
-messageSends: ["parse:", "data", "at:", "sockets", "ifTrue:ifFalse:", "handle:", "ifTrue:", "onconnect:message:", "===", "connected"],
+source: "onMessageWSOverrideBlock\x0a\x0a\x09^ [: msg |    | mMsgObj mSocket |\x0a                      \x0a                    mMsgObj := JSON parse: msg data .\x0a    \x0a\x09 \x09\x09\x09\x09mSocket := (self sockets at: (mMsgObj at: 'identity')).\x0a     \x0a\x09\x09\x09\x09\x09mSocket connected\x0a    \x09\x09\x09\x09\x09\x09ifTrue:[  mSocket  primHandle: (mMsgObj at:'content')]\x0a\x09\x09\x09\x09\x09\x09\x09ifFalse:[  ((mMsgObj at: 'msg_type' ) === 'connection_reply')\x0a        \x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].\x0a                          \x0a        ].\x0a                         \x0a                         ",
+messageSends: ["parse:", "data", "at:", "sockets", "ifTrue:ifFalse:", "primHandle:", "ifTrue:", "onconnect:message:", "===", "connected"],
 referencedClasses: ["JSON"]
 }),
 smalltalk.ZMQContext);
@@ -416,6 +416,39 @@ smalltalk.ZMQContext.klass);
 
 
 smalltalk.addClass('ZMQNode', smalltalk.Object, ['zmqSocket'], 'ZMQ-Support-Core');
+smalltalk.addMethod(
+"_zmqSocket",
+smalltalk.method({
+selector: "zmqSocket",
+category: 'not yet classified',
+fn: function () {
+    var self = this;
+    return self['@zmqSocket'];
+},
+args: [],
+source: "zmqSocket\x0a\x0a\x09^zmqSocket",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQNode);
+
+smalltalk.addMethod(
+"_zmqSocket_",
+smalltalk.method({
+selector: "zmqSocket:",
+category: 'not yet classified',
+fn: function (aZMQSocket) {
+    var self = this;
+    self['@zmqSocket'] = aZMQSocket;
+    return self;
+},
+args: ["aZMQSocket"],
+source: "zmqSocket: aZMQSocket\x0a\x0a\x09zmqSocket := aZMQSocket",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQNode);
+
 
 smalltalk.addMethod(
 "_new",
@@ -475,7 +508,7 @@ fn: function (aFuncName, anArgs, aKWArgs, aCallback) {
     return self;
 },
 args: ["aFuncName", "anArgs", "aKWArgs", "aCallback"],
-source: "rpc: aFuncName args: anArgs kwargs: aKWArgs callback: aCallback\x0a\x0a\x09| mMessage mWrappedCallback | \x0a\x0a mMessage := Dictionary new\x0a\x09\x09\x09\x09\x09\x09\x09at: 'funcname'  put: aFuncName;\x0a                            at: 'args'  put: anArgs;\x0a                            at: 'kwargs'  put: aKWArgs;\x0a\x09\x09\x09\x09\x09\x09\x09yourself.\x0a                            \x0a    mWrappedCallback := [:msg  |  |mMsgObj |\x0a\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09mMsgObj := JSON parse: mMessage.\x0a\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09self callback: ( mMsgObj at: 'returnval') ].\x0a    \x0a    self zmqSocket send: (JSON stringify: mMessage ) callback: mWrappedCallback.",
+source: "rpc: aFuncName args: anArgs kwargs: aKWArgs callback: aCallback\x0a\x0a\x09| mMessage mWrappedCallback | \x0a\x0a mMessage := Dictionary new\x0a\x09\x09\x09    at: 'funcname'  put: aFuncName;\x0a                            at: 'args'  put: anArgs;\x0a                            at: 'kwargs'  put: aKWArgs;\x0a\x09\x09\x09\x09\x09\x09\x09yourself.\x0a                            \x0a    mWrappedCallback := [:msg  |  |mMsgObj |\x0a\x09\x09\x09\x09\x09\x09mMsgObj := JSON parse: mMessage.\x0a\x09\x09\x09\x09\x09\x09self callback: ( mMsgObj at: 'returnval') ].\x0a    \x0a    self zmqSocket send: (JSON stringify: mMessage ) callback: mWrappedCallback.",
 messageSends: ["at:put:", "new", "yourself", "parse:", "callback:", "at:", "send:callback:", "stringify:", "zmqSocket"],
 referencedClasses: ["Dictionary", "JSON"]
 }),
@@ -499,7 +532,7 @@ fn: function (aMessage) {
     mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [aMessage]);
     mFuncName = smalltalk.send(mMsgObj, "_at_", ["funcname"]);
     mArgs = smalltalk.send(mMsgObj, "_at_ifAbsent_", ["args", function () {return smalltalk.send(smalltalk.Array || Array, "_new", []);}]);
-    smalltalk.send(self, "_try_catch_", [function () {mRetVal = smalltalk.send(self, "_basicPerfrom_withArguments_", [mFuncName, mArgs]);return mRetVal;}, function (err) {mRetVal = err;return mRetVal;}]);
+    smalltalk.send(self, "_try_catch_", [function () {mRetVal = smalltalk.send(self, "_basicPerform_withArguments_", [mFuncName, mArgs]);return mRetVal;}, function (err) {mRetVal = err;return mRetVal;}]);
     $1 = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     smalltalk.send($1, "_at_put_", ["returnval", mRetVal]);
     $2 = smalltalk.send($1, "_yourself", []);
@@ -507,8 +540,8 @@ fn: function (aMessage) {
     return self;
 },
 args: ["aMessage"],
-source: "handle: aMessage\x0a\x0a\x09 | mMsgObj mFuncName mArgs mRetVal |\x0a\x0a    mMsgObj := JSON parse: aMessage.\x0a    mFuncName := mMsgObj at: 'funcname'.\x0a    mArgs := mMsgObj at: 'args' ifAbsent: [Array new].\x0a    \x0a    self try: [ mRetVal :=  self basicPerfrom: mFuncName withArguments: mArgs] catch: [:err  |  mRetVal := err   ].\x0a   \x0a    self zmqSocket send: (JSON stringify:( Dictionary new at: 'returnval'  put: mRetVal ; yourself )).\x0a\x0a",
-messageSends: ["parse:", "at:", "at:ifAbsent:", "new", "try:catch:", "basicPerfrom:withArguments:", "send:", "stringify:", "at:put:", "yourself", "zmqSocket"],
+source: "handle: aMessage\x0a\x0a\x09 | mMsgObj mFuncName mArgs mRetVal |\x0a\x0a    mMsgObj := JSON parse: aMessage.\x0a    mFuncName := mMsgObj at: 'funcname'.\x0a    mArgs := mMsgObj at: 'args' ifAbsent: [Array new].\x0a    \x0a    self try: [ mRetVal :=  self basicPerform: mFuncName withArguments: mArgs] catch: [:err  |  mRetVal := err   ].\x0a   \x0a    self zmqSocket send: (JSON stringify:( Dictionary new at: 'returnval'  put: mRetVal ; yourself )).\x0a\x0a",
+messageSends: ["parse:", "at:", "at:ifAbsent:", "new", "try:catch:", "basicPerform:withArguments:", "send:", "stringify:", "at:put:", "yourself", "zmqSocket"],
 referencedClasses: ["JSON", "Array", "Dictionary"]
 }),
 smalltalk.ZMQRPCServer);
@@ -569,12 +602,12 @@ fn: function (aMessage) {
     mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [aMessage]);
     mFuncName = smalltalk.send(mMsgObj, "_at_", ["funcname"]);
     mArgs = smalltalk.send(mMsgObj, "_at_ifAbsent_", ["args", function () {return smalltalk.send(smalltalk.Array || Array, "_new", []);}]);
-    smalltalk.send(self, "_basicPerfrom_withArguments_", [mFuncName, mArgs]);
+    smalltalk.send(self, "_basicPerform_withArguments_", [mFuncName, mArgs]);
     return self;
 },
 args: ["aMessage"],
-source: "handlePub: aMessage\x0a\x0a\x09 | mMsgObj mFuncName mArgs |\x0a\x0a    mMsgObj := JSON parse: aMessage.\x0a    mFuncName := mMsgObj at: 'funcname'.\x0a    mArgs := mMsgObj at: 'args' ifAbsent: [Array new].\x0a    \x0a    self basicPerfrom: mFuncName withArguments: mArgs.\x0a   \x0a",
-messageSends: ["parse:", "at:", "at:ifAbsent:", "new", "basicPerfrom:withArguments:"],
+source: "handlePub: aMessage\x0a\x0a\x09 | mMsgObj mFuncName mArgs |\x0a\x0a    mMsgObj := JSON parse: aMessage.\x0a    mFuncName := mMsgObj at: 'funcname'.\x0a    mArgs := mMsgObj at: 'args' ifAbsent: [Array new].\x0a    \x0a    self basicPerform: mFuncName withArguments: mArgs.\x0a   \x0a",
+messageSends: ["parse:", "at:", "at:ifAbsent:", "new", "basicPerform:withArguments:"],
 referencedClasses: ["JSON", "Array"]
 }),
 smalltalk.ZMQPubRPCServer);
@@ -591,12 +624,12 @@ fn: function () {
     if (smalltalk.assert($1)) {
         return self;
     }
-    smalltalk.send(smalltalk.send(self, "_zmqSocket", []), "_at_put_", ["onmessage", function (msg) {return smalltalk.send(self, "_handlePub_", [msg]);}]);
+    smalltalk.send(smalltalk.send(self, "_zmqSocket", []), "_overrideSocketOnMessageWith_", [function (msg) {return smalltalk.send(self, "_handlePub_", [msg]);}]);
     return self;
 },
 args: [],
-source: "overrideSocketOnMessage\x0a    \x0a    self zmqSocket notNil\x0a    \x09ifTrue:[^self].\x0a        \x0a\x09self zmqSocket at: 'onmessage'  put: [:msg  | self handlePub: msg ].\x0a\x09 ",
-messageSends: ["ifTrue:", "notNil", "zmqSocket", "at:put:", "handlePub:"],
+source: "overrideSocketOnMessage\x0a    \x0a    self zmqSocket notNil\x0a    \x09ifTrue:[^self].\x0a        \x0a\x09self zmqSocket overrideSocketOnMessageWith: [:msg  | self handlePub: msg ].\x0a\x09 ",
+messageSends: ["ifTrue:", "notNil", "zmqSocket", "overrideSocketOnMessageWith:", "handlePub:"],
 referencedClasses: []
 }),
 smalltalk.ZMQPubRPCServer);
@@ -655,16 +688,16 @@ fn: function (aMessage, aMessageType) {
     } else {
         mMessageType = aMessageType;
     }
-    mMessageStruct = smalltalk.send(smalltalk.Array || Array, "_new", []);
+    mMessageStruct = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     smalltalk.send(mMessageStruct, "_at_put_", ["identity", smalltalk.send(self, "_identity", [])]);
     smalltalk.send(mMessageStruct, "_at_put_", ["content", aMessage]);
     smalltalk.send(mMessageStruct, "_at_put_", ["msg_type", mMessageType]);
     return mMessageStruct;
 },
 args: ["aMessage", "aMessageType"],
-source: "constructMessage: aMessage type: aMessageType\x0a\x0a\x09  | mMessageType mMessageStruct |\x0a\x0a\x09aMessageType isNil\x0a    \x09ifTrue:[ mMessageType = 'userlevel']\x0a      \x09ifFalse:[mMessageType := aMessageType ].\x0a        \x0a      mMessageStruct := Array new.\x0a      \x0a     mMessageStruct at: 'identity' put: self identity.\x0a     mMessageStruct at: 'content' put: aMessage.\x0a     mMessageStruct at: 'msg_type' put: mMessageType.\x0a     \x0a     ^mMessageStruct\x0a     \x0a     \x0a",
+source: "constructMessage: aMessage type: aMessageType\x0a\x0a\x09  | mMessageType mMessageStruct |\x0a\x0a   aMessageType isNil\x0a    \x09ifTrue:[ mMessageType = 'userlevel']\x0a      \x09ifFalse:[mMessageType := aMessageType ].\x0a        \x0a      mMessageStruct := Dictionary new.\x0a      \x0a     mMessageStruct at: 'identity' put: self identity.\x0a     mMessageStruct at: 'content' put: aMessage.\x0a     mMessageStruct at: 'msg_type' put: mMessageType.\x0a     \x0a     ^mMessageStruct\x0a     \x0a     \x0a",
 messageSends: ["ifTrue:ifFalse:", "=", "isNil", "new", "at:put:", "identity"],
-referencedClasses: ["Array"]
+referencedClasses: ["Dictionary"]
 }),
 smalltalk.ZMQSocket);
 
@@ -719,68 +752,18 @@ referencedClasses: []
 smalltalk.ZMQSocket);
 
 smalltalk.addMethod(
-"_primHandle_",
+"_overrideSocketOnMessageWith_",
 smalltalk.method({
-selector: "primHandle:",
+selector: "overrideSocketOnMessageWith:",
 category: 'not yet classified',
-fn: function (aMessage) {
+fn: function (aBlock) {
     var self = this;
-    var mCallback;
-    smalltalk.send(self, "_busy_", [false]);
-    mCallback = smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_at_", [0]), "_at_", [1]);
-    smalltalk.send(self, "_reqrepBuffer_", [smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_slice_", [1])]);
-    smalltalk.send(self, "_callback_", [aMessage]);
-    smalltalk.send(self, "_primSendBuffer", []);
+    smalltalk.send(smalltalk.send(self, "_zmqContext", []), "_at_put_", ["onmessage", aBlock]);
     return self;
 },
-args: ["aMessage"],
-source: "primHandle: aMessage\x0a\x09   \x0a   | mCallback | \x0a\x0a    self busy: false.\x0a    \x0a    mCallback := (self reqrepBuffer at: 0 ) at: 1.\x0a    \x0a    self reqrepBuffer: (self reqrepBuffer slice:1).\x0a    \x0a    self callback: aMessage.\x0a    \x0a    self primSendBuffer",
-messageSends: ["busy:", "at:", "reqrepBuffer", "reqrepBuffer:", "slice:", "callback:", "primSendBuffer"],
-referencedClasses: []
-}),
-smalltalk.ZMQSocket);
-
-smalltalk.addMethod(
-"_primSend_callback_",
-smalltalk.method({
-selector: "primSend:callback:",
-category: 'not yet classified',
-fn: function (aMessage, aCallback) {
-    var self = this;
-    var $1;
-    smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_push_", [function () {return smalltalk.send(aMessage, "__comma", [aCallback]);}]);
-    $1 = smalltalk.send(self, "_busy", []);
-    if (smalltalk.assert($1)) {
-        return self;
-    }
-    smalltalk.send(self, "_primSendBuffer", []);
-    return self;
-},
-args: ["aMessage", "aCallback"],
-source: "primSend: aMessage callback: aCallback \x0a\x0a\x09self reqrepBuffer push: [aMessage , aCallback].\x0a   \x0a   self busy\x0a   \x09\x09ifTrue:[^self].\x0a    \x0a\x09self primSendBuffer\x0a    ",
-messageSends: ["push:", ",", "reqrepBuffer", "ifTrue:", "busy", "primSendBuffer"],
-referencedClasses: []
-}),
-smalltalk.ZMQSocket);
-
-smalltalk.addMethod(
-"_primSendBuffer",
-smalltalk.method({
-selector: "primSendBuffer",
-category: 'not yet classified',
-fn: function () {
-    var self = this;
-    var $1;
-    $1 = smalltalk.send(smalltalk.send(self, "_busy", []), "_||", [smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_length", []), "__eq", [0])]);
-    if (smalltalk.assert($1)) {
-        return self;
-    }
-    smalltalk.send(self, "_busy_send_", [smalltalk.send(smalltalk.send(true, "_self", []), "_zmqContext", []), smalltalk.send(self, "_reqrepBuffer_", [0])]);
-    return self;
-},
-args: [],
-source: "primSendBuffer\x0a\x09   \x0a   (self busy) || (self reqrepBuffer length = 0) \x0a   \x09\x09ifTrue:[^self].\x0a    \x0a    self busy: true\x0a\x09self  zmqContext send: ( self reqrepBuffer: 0).\x0a    ",
-messageSends: ["ifTrue:", "||", "=", "length", "reqrepBuffer", "busy", "busy:send:", "zmqContext", "self", "reqrepBuffer:"],
+args: ["aBlock"],
+source: "overrideSocketOnMessageWith: aBlock\x0a\x0a     self zmqContext at: 'onmessage'  put: aBlock\x0a\x09 ",
+messageSends: ["at:put:", "zmqContext"],
 referencedClasses: []
 }),
 smalltalk.ZMQSocket);
@@ -794,12 +777,12 @@ fn: function (aMessage, aCallback, aMessageType) {
     var self = this;
     var mMsgObj;
     mMsgObj = smalltalk.send(self, "_constructMessage_type_", [aMessage, aMessageType]);
-    smalltalk.send(self, "_send_callback_", [smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [mMsgObj]), aCallback]);
+    smalltalk.send(self, "_primSend_callback_", [smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [mMsgObj]), aCallback]);
     return self;
 },
 args: ["aMessage", "aCallback", "aMessageType"],
-source: "send: aMessage callback: aCallback type: aMessageType\x0a\x0a\x09 |  mMsgObj |\x0a\x0a    mMsgObj := self constructMessage: aMessage type: aMessageType.\x0a    self send: (JSON stringify: mMsgObj) callback: aCallback\x0a",
-messageSends: ["constructMessage:type:", "send:callback:", "stringify:"],
+source: "send: aMessage callback: aCallback type: aMessageType\x0a\x0a\x09 |  mMsgObj |\x0a\x0a    mMsgObj := self constructMessage: aMessage type: aMessageType.\x0a    self primSend: (JSON stringify: mMsgObj) callback: aCallback\x0a",
+messageSends: ["constructMessage:type:", "primSend:callback:", "stringify:"],
 referencedClasses: ["JSON"]
 }),
 smalltalk.ZMQSocket);
@@ -877,19 +860,52 @@ smalltalk.ZMQSocket.klass);
 
 smalltalk.addClass('ZMQRepSocket', smalltalk.ZMQSocket, ['inBuffer'], 'ZMQ-Support-Core');
 smalltalk.addMethod(
+"_inBuffer",
+smalltalk.method({
+selector: "inBuffer",
+category: 'not yet classified',
+fn: function () {
+    var self = this;
+    return self['@inBuffer'];
+},
+args: [],
+source: "inBuffer\x0a\x0a\x09^inBuffer",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQRepSocket);
+
+smalltalk.addMethod(
+"_inBuffer_",
+smalltalk.method({
+selector: "inBuffer:",
+category: 'not yet classified',
+fn: function (aBuffer) {
+    var self = this;
+    self['@inBuffer'] = aBuffer;
+    return self;
+},
+args: ["aBuffer"],
+source: "inBuffer: aBuffer\x0a\x0a\x09inBuffer := aBuffer",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQRepSocket);
+
+smalltalk.addMethod(
 "_primHandle_",
 smalltalk.method({
 selector: "primHandle:",
 category: 'not yet classified',
 fn: function (aMessage) {
     var self = this;
-    smalltalk.send(smalltalk.send(self, "_inBuffer", []), "_push", []);
+    smalltalk.send(smalltalk.send(self, "_inBuffer", []), "_push_", [aMessage]);
     smalltalk.send(self, "_primRecvBuffer", []);
     return self;
 },
 args: ["aMessage"],
-source: "primHandle: aMessage \x0a\x0a    self inBuffer push. aMessage.\x0a    self primRecvBuffer\x0a    ",
-messageSends: ["push", "inBuffer", "primRecvBuffer"],
+source: "primHandle: aMessage \x0a\x0a    self inBuffer push: aMessage.\x0a    self primRecvBuffer\x0a    ",
+messageSends: ["push:", "inBuffer", "primRecvBuffer"],
 referencedClasses: []
 }),
 smalltalk.ZMQRepSocket);
@@ -968,6 +984,139 @@ smalltalk.ZMQRepSocket);
 
 
 smalltalk.addClass('ZMQReqSocket', smalltalk.ZMQSocket, ['reqrepBuffer', 'busy'], 'ZMQ-Support-Core');
+smalltalk.addMethod(
+"_busy",
+smalltalk.method({
+selector: "busy",
+category: 'not yet classified',
+fn: function () {
+    var self = this;
+    return self['@busy'];
+},
+args: [],
+source: "busy\x0a\x0a\x09^busy",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_busy_",
+smalltalk.method({
+selector: "busy:",
+category: 'not yet classified',
+fn: function (aBool) {
+    var self = this;
+    self['@busy'] = aBool;
+    return self;
+},
+args: ["aBool"],
+source: "busy: aBool\x0a\x0a\x09busy := aBool",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primHandle_",
+smalltalk.method({
+selector: "primHandle:",
+category: 'not yet classified',
+fn: function (aMessage) {
+    var self = this;
+    var mCallback;
+    smalltalk.send(self, "_busy_", [false]);
+    mCallback = smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_at_", [0]), "_at_", [1]);
+    smalltalk.send(self, "_reqrepBuffer_", [smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_slice_", [1])]);
+    smalltalk.send(self, "_callback_", [aMessage]);
+    smalltalk.send(self, "_primSendBuffer", []);
+    return self;
+},
+args: ["aMessage"],
+source: "primHandle: aMessage\x0a\x09   \x0a   | mCallback | \x0a\x0a    self busy: false.\x0a    \x0a    mCallback := (self reqrepBuffer at: 0 ) at: 1.\x0a    \x0a    self reqrepBuffer: (self reqrepBuffer slice:1).\x0a    \x0a    self callback: aMessage.\x0a    \x0a    self primSendBuffer",
+messageSends: ["busy:", "at:", "reqrepBuffer", "reqrepBuffer:", "slice:", "callback:", "primSendBuffer"],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primSend_callback_",
+smalltalk.method({
+selector: "primSend:callback:",
+category: 'not yet classified',
+fn: function (aMessage, aCallback) {
+    var self = this;
+    var $1;
+    smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_push_", [function () {return smalltalk.send(aMessage, "__comma", [aCallback]);}]);
+    $1 = smalltalk.send(self, "_busy", []);
+    if (smalltalk.assert($1)) {
+        return self;
+    }
+    smalltalk.send(self, "_primSendBuffer", []);
+    return self;
+},
+args: ["aMessage", "aCallback"],
+source: "primSend: aMessage callback: aCallback \x0a\x0a\x09self reqrepBuffer push: [aMessage , aCallback].\x0a   \x0a   self busy\x0a   \x09\x09ifTrue:[^self].\x0a    \x0a\x09self primSendBuffer\x0a    ",
+messageSends: ["push:", ",", "reqrepBuffer", "ifTrue:", "busy", "primSendBuffer"],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primSendBuffer",
+smalltalk.method({
+selector: "primSendBuffer",
+category: 'not yet classified',
+fn: function () {
+    var self = this;
+    var $1;
+    $1 = smalltalk.send(smalltalk.send(self, "_busy", []), "_||", [smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_length", []), "__eq", [0])]);
+    if (smalltalk.assert($1)) {
+        return self;
+    }
+    smalltalk.send(self, "_busy_send_", [smalltalk.send(smalltalk.send(true, "_self", []), "_zmqContext", []), smalltalk.send(self, "_reqrepBuffer_", [0])]);
+    return self;
+},
+args: [],
+source: "primSendBuffer\x0a\x09   \x0a   (self busy) || (self reqrepBuffer length = 0) \x0a   \x09\x09ifTrue:[^self].\x0a    \x0a    self busy: true\x0a\x09self  zmqContext send: ( self reqrepBuffer: 0).\x0a    ",
+messageSends: ["ifTrue:", "||", "=", "length", "reqrepBuffer", "busy", "busy:send:", "zmqContext", "self", "reqrepBuffer:"],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_reqrepBuffer",
+smalltalk.method({
+selector: "reqrepBuffer",
+category: 'not yet classified',
+fn: function () {
+    var self = this;
+    return self['@reqrepBuffer'];
+},
+args: [],
+source: "reqrepBuffer\x0a\x0a\x09^reqrepBuffer",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_reqrepBuffer_",
+smalltalk.method({
+selector: "reqrepBuffer:",
+category: 'not yet classified',
+fn: function (aBuffer) {
+    var self = this;
+    self['@reqrepBuffer'] = aBuffer;
+    return self;
+},
+args: ["aBuffer"],
+source: "reqrepBuffer: aBuffer\x0a\x0a\x09reqrepBuffer := aBuffer",
+messageSends: [],
+referencedClasses: []
+}),
+smalltalk.ZMQReqSocket);
+
 smalltalk.addMethod(
 "_socketType",
 smalltalk.method({

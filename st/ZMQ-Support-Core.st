@@ -61,13 +61,13 @@ createNewReqSocket
 
 createNewSocket: aZMQSocketType
 
-   aZMQSocketType = 'SUB'
+   aZMQSocketType = SUB
    		ifTrue:[ ^self registerNewSocket: ( ZMQSubSocket newOnContext: self )  ].
   
-   aZMQSocketType = 'REQ'
+   aZMQSocketType = REQ
    		ifTrue:[ ^self registerNewSocket: ( ZMQReqSocket newOnContext: self )  ].
         
-   aZMQSocketType = 'REP'
+   aZMQSocketType = REP
    		ifTrue:[ ^self registerNewSocket:  ( ZMQRepSocket newOnContext: self ) ].
         
     ^self error: 'SocketType not yet supported'
@@ -80,7 +80,7 @@ createNewSubSocket
 
 initialize
 
-	zmqSockets := Array new.
+	zmqSockets := Dictionary new.
 !
 
 initializeOnURL: aWSConnectionURL
@@ -109,7 +109,7 @@ onMessageWSOverrideBlock
 	 				mSocket := (self sockets at: (mMsgObj at: 'identity')).
      
 					mSocket connected
-    						ifTrue:[  mSocket  handle: (mMsgObj at:'content')]
+    						ifTrue:[  mSocket  primHandle: (mMsgObj at:'content')]
 							ifFalse:[  ((mMsgObj at: 'msg_type' ) === 'connection_reply')
         												ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].
                           
@@ -182,6 +182,18 @@ Object subclass: #ZMQNode
 	instanceVariableNames: 'zmqSocket'
 	package: 'ZMQ-Support-Core'!
 
+!ZMQNode methodsFor: 'not yet classified'!
+
+zmqSocket
+
+	^zmqSocket
+!
+
+zmqSocket: aZMQSocket
+
+	zmqSocket := aZMQSocket
+! !
+
 !ZMQNode class methodsFor: 'not yet classified'!
 
 new
@@ -205,14 +217,14 @@ rpc: aFuncName args: anArgs kwargs: aKWArgs callback: aCallback
 	| mMessage mWrappedCallback | 
 
  mMessage := Dictionary new
-							at: 'funcname'  put: aFuncName;
+			    at: 'funcname'  put: aFuncName;
                             at: 'args'  put: anArgs;
                             at: 'kwargs'  put: aKWArgs;
 							yourself.
                             
     mWrappedCallback := [:msg  |  |mMsgObj |
-											mMsgObj := JSON parse: mMessage.
-											self callback: ( mMsgObj at: 'returnval') ].
+						mMsgObj := JSON parse: mMessage.
+						self callback: ( mMsgObj at: 'returnval') ].
     
     self zmqSocket send: (JSON stringify: mMessage ) callback: mWrappedCallback.
 ! !
@@ -231,7 +243,7 @@ handle: aMessage
     mFuncName := mMsgObj at: 'funcname'.
     mArgs := mMsgObj at: 'args' ifAbsent: [Array new].
     
-    self try: [ mRetVal :=  self basicPerfrom: mFuncName withArguments: mArgs] catch: [:err  |  mRetVal := err   ].
+    self try: [ mRetVal :=  self basicPerform: mFuncName withArguments: mArgs] catch: [:err  |  mRetVal := err   ].
    
     self zmqSocket send: (JSON stringify:( Dictionary new at: 'returnval'  put: mRetVal ; yourself )).
 !
@@ -265,7 +277,7 @@ handlePub: aMessage
     mFuncName := mMsgObj at: 'funcname'.
     mArgs := mMsgObj at: 'args' ifAbsent: [Array new].
     
-    self basicPerfrom: mFuncName withArguments: mArgs.
+    self basicPerform: mFuncName withArguments: mArgs.
 !
 
 overrideSocketOnMessage
@@ -273,7 +285,7 @@ overrideSocketOnMessage
     self zmqSocket notNil
     	ifTrue:[^self].
         
-	self zmqSocket at: 'onmessage'  put: [:msg  | self handlePub: msg ].
+	self zmqSocket overrideSocketOnMessageWith: [:msg  | self handlePub: msg ].
 ! !
 
 Object subclass: #ZMQSocket
@@ -296,11 +308,11 @@ constructMessage: aMessage type: aMessageType
 
 	  | mMessageType mMessageStruct |
 
-	aMessageType isNil
+   aMessageType isNil
     	ifTrue:[ mMessageType = 'userlevel']
       	ifFalse:[mMessageType := aMessageType ].
         
-      mMessageStruct := Array new.
+      mMessageStruct := Dictionary new.
       
      mMessageStruct at: 'identity' put: self identity.
      mMessageStruct at: 'content' put: aMessage.
@@ -324,38 +336,9 @@ initializeOnContext: aZMQContext
      zmqContext := aZMQContext
 !
 
-primHandle: aMessage
-	   
-   | mCallback | 
+overrideSocketOnMessageWith: aBlock
 
-    self busy: false.
-    
-    mCallback := (self reqrepBuffer at: 0 ) at: 1.
-    
-    self reqrepBuffer: (self reqrepBuffer slice:1).
-    
-    self callback: aMessage.
-    
-    self primSendBuffer
-!
-
-primSend: aMessage callback: aCallback 
-
-	self reqrepBuffer push: [aMessage , aCallback].
-   
-   self busy
-   		ifTrue:[^self].
-    
-	self primSendBuffer
-!
-
-primSendBuffer
-	   
-   (self busy) || (self reqrepBuffer length = 0) 
-   		ifTrue:[^self].
-    
-    self busy: true
-	self  zmqContext send: ( self reqrepBuffer: 0).
+     self zmqContext at: 'onmessage'  put: aBlock
 !
 
 send: aMessage callback: aCallback type: aMessageType
@@ -363,7 +346,7 @@ send: aMessage callback: aCallback type: aMessageType
 	 |  mMsgObj |
 
     mMsgObj := self constructMessage: aMessage type: aMessageType.
-    self send: (JSON stringify: mMsgObj) callback: aCallback
+    self primSend: (JSON stringify: mMsgObj) callback: aCallback
 !
 
 socketType
@@ -394,9 +377,19 @@ ZMQSocket subclass: #ZMQRepSocket
 
 !ZMQRepSocket methodsFor: 'not yet classified'!
 
+inBuffer
+
+	^inBuffer
+!
+
+inBuffer: aBuffer
+
+	inBuffer := aBuffer
+!
+
 primHandle: aMessage 
 
-    self inBuffer push. aMessage.
+    self inBuffer push: aMessage.
     self primRecvBuffer
 !
 
@@ -447,6 +440,60 @@ ZMQSocket subclass: #ZMQReqSocket
 	package: 'ZMQ-Support-Core'!
 
 !ZMQReqSocket methodsFor: 'not yet classified'!
+
+busy
+
+	^busy
+!
+
+busy: aBool
+
+	busy := aBool
+!
+
+primHandle: aMessage
+	   
+   | mCallback | 
+
+    self busy: false.
+    
+    mCallback := (self reqrepBuffer at: 0 ) at: 1.
+    
+    self reqrepBuffer: (self reqrepBuffer slice:1).
+    
+    self callback: aMessage.
+    
+    self primSendBuffer
+!
+
+primSend: aMessage callback: aCallback 
+
+	self reqrepBuffer push: [aMessage , aCallback].
+   
+   self busy
+   		ifTrue:[^self].
+    
+	self primSendBuffer
+!
+
+primSendBuffer
+	   
+   (self busy) || (self reqrepBuffer length = 0) 
+   		ifTrue:[^self].
+    
+    self busy: true
+	self  zmqContext send: ( self reqrepBuffer: 0).
+!
+
+reqrepBuffer
+
+	^reqrepBuffer
+!
+
+reqrepBuffer: aBuffer
+
+	reqrepBuffer := aBuffer
+!
 
 socketType
 

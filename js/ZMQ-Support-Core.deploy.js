@@ -98,17 +98,17 @@ selector: "createNewSocket:",
 fn: function (aZMQSocketType) {
     var self = this;
     var $1, $2, $3, $4, $5, $6, $7;
-    $1 = smalltalk.send(aZMQSocketType, "__eq", ["SUB"]);
+    $1 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.SUB || SUB]);
     if (smalltalk.assert($1)) {
         $2 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQSubSocket || ZMQSubSocket, "_newOnContext_", [self])]);
         return $2;
     }
-    $3 = smalltalk.send(aZMQSocketType, "__eq", ["REQ"]);
+    $3 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.REQ || REQ]);
     if (smalltalk.assert($3)) {
         $4 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQReqSocket || ZMQReqSocket, "_newOnContext_", [self])]);
         return $4;
     }
-    $5 = smalltalk.send(aZMQSocketType, "__eq", ["REP"]);
+    $5 = smalltalk.send(aZMQSocketType, "__eq", [smalltalk.REP || REP]);
     if (smalltalk.assert($5)) {
         $6 = smalltalk.send(self, "_registerNewSocket_", [smalltalk.send(smalltalk.ZMQRepSocket || ZMQRepSocket, "_newOnContext_", [self])]);
         return $6;
@@ -138,7 +138,7 @@ smalltalk.method({
 selector: "initialize",
 fn: function () {
     var self = this;
-    self['@zmqSockets'] = smalltalk.send(smalltalk.Array || Array, "_new", []);
+    self['@zmqSockets'] = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     return self;
 }
 }),
@@ -179,7 +179,7 @@ selector: "onMessageWSOverrideBlock",
 fn: function () {
     var self = this;
     var $2, $3, $1;
-    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(msg, "_data", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_handle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq_eq_eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
+    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(msg, "_data", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_primHandle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq_eq_eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
     return $1;
 }
 }),
@@ -311,6 +311,29 @@ smalltalk.ZMQContext.klass);
 
 
 smalltalk.addClass('ZMQNode', smalltalk.Object, ['zmqSocket'], 'ZMQ-Support-Core');
+smalltalk.addMethod(
+"_zmqSocket",
+smalltalk.method({
+selector: "zmqSocket",
+fn: function () {
+    var self = this;
+    return self['@zmqSocket'];
+}
+}),
+smalltalk.ZMQNode);
+
+smalltalk.addMethod(
+"_zmqSocket_",
+smalltalk.method({
+selector: "zmqSocket:",
+fn: function (aZMQSocket) {
+    var self = this;
+    self['@zmqSocket'] = aZMQSocket;
+    return self;
+}
+}),
+smalltalk.ZMQNode);
+
 
 smalltalk.addMethod(
 "_new",
@@ -378,7 +401,7 @@ fn: function (aMessage) {
     mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [aMessage]);
     mFuncName = smalltalk.send(mMsgObj, "_at_", ["funcname"]);
     mArgs = smalltalk.send(mMsgObj, "_at_ifAbsent_", ["args", function () {return smalltalk.send(smalltalk.Array || Array, "_new", []);}]);
-    smalltalk.send(self, "_try_catch_", [function () {mRetVal = smalltalk.send(self, "_basicPerfrom_withArguments_", [mFuncName, mArgs]);return mRetVal;}, function (err) {mRetVal = err;return mRetVal;}]);
+    smalltalk.send(self, "_try_catch_", [function () {mRetVal = smalltalk.send(self, "_basicPerform_withArguments_", [mFuncName, mArgs]);return mRetVal;}, function (err) {mRetVal = err;return mRetVal;}]);
     $1 = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     smalltalk.send($1, "_at_put_", ["returnval", mRetVal]);
     $2 = smalltalk.send($1, "_yourself", []);
@@ -433,7 +456,7 @@ fn: function (aMessage) {
     mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [aMessage]);
     mFuncName = smalltalk.send(mMsgObj, "_at_", ["funcname"]);
     mArgs = smalltalk.send(mMsgObj, "_at_ifAbsent_", ["args", function () {return smalltalk.send(smalltalk.Array || Array, "_new", []);}]);
-    smalltalk.send(self, "_basicPerfrom_withArguments_", [mFuncName, mArgs]);
+    smalltalk.send(self, "_basicPerform_withArguments_", [mFuncName, mArgs]);
     return self;
 }
 }),
@@ -450,7 +473,7 @@ fn: function () {
     if (smalltalk.assert($1)) {
         return self;
     }
-    smalltalk.send(smalltalk.send(self, "_zmqSocket", []), "_at_put_", ["onmessage", function (msg) {return smalltalk.send(self, "_handlePub_", [msg]);}]);
+    smalltalk.send(smalltalk.send(self, "_zmqSocket", []), "_overrideSocketOnMessageWith_", [function (msg) {return smalltalk.send(self, "_handlePub_", [msg]);}]);
     return self;
 }
 }),
@@ -499,7 +522,7 @@ fn: function (aMessage, aMessageType) {
     } else {
         mMessageType = aMessageType;
     }
-    mMessageStruct = smalltalk.send(smalltalk.Array || Array, "_new", []);
+    mMessageStruct = smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", []);
     smalltalk.send(mMessageStruct, "_at_put_", ["identity", smalltalk.send(self, "_identity", [])]);
     smalltalk.send(mMessageStruct, "_at_put_", ["content", aMessage]);
     smalltalk.send(mMessageStruct, "_at_put_", ["msg_type", mMessageType]);
@@ -544,52 +567,12 @@ fn: function (aZMQContext) {
 smalltalk.ZMQSocket);
 
 smalltalk.addMethod(
-"_primHandle_",
+"_overrideSocketOnMessageWith_",
 smalltalk.method({
-selector: "primHandle:",
-fn: function (aMessage) {
+selector: "overrideSocketOnMessageWith:",
+fn: function (aBlock) {
     var self = this;
-    var mCallback;
-    smalltalk.send(self, "_busy_", [false]);
-    mCallback = smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_at_", [0]), "_at_", [1]);
-    smalltalk.send(self, "_reqrepBuffer_", [smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_slice_", [1])]);
-    smalltalk.send(self, "_callback_", [aMessage]);
-    smalltalk.send(self, "_primSendBuffer", []);
-    return self;
-}
-}),
-smalltalk.ZMQSocket);
-
-smalltalk.addMethod(
-"_primSend_callback_",
-smalltalk.method({
-selector: "primSend:callback:",
-fn: function (aMessage, aCallback) {
-    var self = this;
-    var $1;
-    smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_push_", [function () {return smalltalk.send(aMessage, "__comma", [aCallback]);}]);
-    $1 = smalltalk.send(self, "_busy", []);
-    if (smalltalk.assert($1)) {
-        return self;
-    }
-    smalltalk.send(self, "_primSendBuffer", []);
-    return self;
-}
-}),
-smalltalk.ZMQSocket);
-
-smalltalk.addMethod(
-"_primSendBuffer",
-smalltalk.method({
-selector: "primSendBuffer",
-fn: function () {
-    var self = this;
-    var $1;
-    $1 = smalltalk.send(smalltalk.send(self, "_busy", []), "_||", [smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_length", []), "__eq", [0])]);
-    if (smalltalk.assert($1)) {
-        return self;
-    }
-    smalltalk.send(self, "_busy_send_", [smalltalk.send(smalltalk.send(true, "_self", []), "_zmqContext", []), smalltalk.send(self, "_reqrepBuffer_", [0])]);
+    smalltalk.send(smalltalk.send(self, "_zmqContext", []), "_at_put_", ["onmessage", aBlock]);
     return self;
 }
 }),
@@ -603,7 +586,7 @@ fn: function (aMessage, aCallback, aMessageType) {
     var self = this;
     var mMsgObj;
     mMsgObj = smalltalk.send(self, "_constructMessage_type_", [aMessage, aMessageType]);
-    smalltalk.send(self, "_send_callback_", [smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [mMsgObj]), aCallback]);
+    smalltalk.send(self, "_primSend_callback_", [smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [mMsgObj]), aCallback]);
     return self;
 }
 }),
@@ -662,12 +645,35 @@ smalltalk.ZMQSocket.klass);
 
 smalltalk.addClass('ZMQRepSocket', smalltalk.ZMQSocket, ['inBuffer'], 'ZMQ-Support-Core');
 smalltalk.addMethod(
+"_inBuffer",
+smalltalk.method({
+selector: "inBuffer",
+fn: function () {
+    var self = this;
+    return self['@inBuffer'];
+}
+}),
+smalltalk.ZMQRepSocket);
+
+smalltalk.addMethod(
+"_inBuffer_",
+smalltalk.method({
+selector: "inBuffer:",
+fn: function (aBuffer) {
+    var self = this;
+    self['@inBuffer'] = aBuffer;
+    return self;
+}
+}),
+smalltalk.ZMQRepSocket);
+
+smalltalk.addMethod(
 "_primHandle_",
 smalltalk.method({
 selector: "primHandle:",
 fn: function (aMessage) {
     var self = this;
-    smalltalk.send(smalltalk.send(self, "_inBuffer", []), "_push", []);
+    smalltalk.send(smalltalk.send(self, "_inBuffer", []), "_push_", [aMessage]);
     smalltalk.send(self, "_primRecvBuffer", []);
     return self;
 }
@@ -733,6 +739,104 @@ smalltalk.ZMQRepSocket);
 
 
 smalltalk.addClass('ZMQReqSocket', smalltalk.ZMQSocket, ['reqrepBuffer', 'busy'], 'ZMQ-Support-Core');
+smalltalk.addMethod(
+"_busy",
+smalltalk.method({
+selector: "busy",
+fn: function () {
+    var self = this;
+    return self['@busy'];
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_busy_",
+smalltalk.method({
+selector: "busy:",
+fn: function (aBool) {
+    var self = this;
+    self['@busy'] = aBool;
+    return self;
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primHandle_",
+smalltalk.method({
+selector: "primHandle:",
+fn: function (aMessage) {
+    var self = this;
+    var mCallback;
+    smalltalk.send(self, "_busy_", [false]);
+    mCallback = smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_at_", [0]), "_at_", [1]);
+    smalltalk.send(self, "_reqrepBuffer_", [smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_slice_", [1])]);
+    smalltalk.send(self, "_callback_", [aMessage]);
+    smalltalk.send(self, "_primSendBuffer", []);
+    return self;
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primSend_callback_",
+smalltalk.method({
+selector: "primSend:callback:",
+fn: function (aMessage, aCallback) {
+    var self = this;
+    var $1;
+    smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_push_", [function () {return smalltalk.send(aMessage, "__comma", [aCallback]);}]);
+    $1 = smalltalk.send(self, "_busy", []);
+    if (smalltalk.assert($1)) {
+        return self;
+    }
+    smalltalk.send(self, "_primSendBuffer", []);
+    return self;
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_primSendBuffer",
+smalltalk.method({
+selector: "primSendBuffer",
+fn: function () {
+    var self = this;
+    var $1;
+    $1 = smalltalk.send(smalltalk.send(self, "_busy", []), "_||", [smalltalk.send(smalltalk.send(smalltalk.send(self, "_reqrepBuffer", []), "_length", []), "__eq", [0])]);
+    if (smalltalk.assert($1)) {
+        return self;
+    }
+    smalltalk.send(self, "_busy_send_", [smalltalk.send(smalltalk.send(true, "_self", []), "_zmqContext", []), smalltalk.send(self, "_reqrepBuffer_", [0])]);
+    return self;
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_reqrepBuffer",
+smalltalk.method({
+selector: "reqrepBuffer",
+fn: function () {
+    var self = this;
+    return self['@reqrepBuffer'];
+}
+}),
+smalltalk.ZMQReqSocket);
+
+smalltalk.addMethod(
+"_reqrepBuffer_",
+smalltalk.method({
+selector: "reqrepBuffer:",
+fn: function (aBuffer) {
+    var self = this;
+    self['@reqrepBuffer'] = aBuffer;
+    return self;
+}
+}),
+smalltalk.ZMQReqSocket);
+
 smalltalk.addMethod(
 "_socketType",
 smalltalk.method({
