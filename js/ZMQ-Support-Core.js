@@ -27,7 +27,7 @@ referencedClasses: []
 smalltalk.ZMQBridge.klass);
 
 
-smalltalk.addClass('ZMQContext', smalltalk.Object, ['s', 'zmqSockets', 'connected', 'sendBuffer'], 'ZMQ-Support-Core');
+smalltalk.addClass('ZMQContext', smalltalk.Object, ['s', 'zmqSockets', 'sendBuffer'], 'ZMQ-Support-Core');
 smalltalk.addMethod(
 "_connect_url_auth_",
 smalltalk.method({
@@ -35,19 +35,20 @@ selector: "connect:url:auth:",
 category: 'not yet classified',
 fn: function (aSocket, aZMQConnString, anAuth) {
     var self = this;
+    var $1;
     var mMsg;
     var mMsgObj;
     smalltalk.send(anAuth, "_at_put_", ["zmq_conn_string", aZMQConnString]);
     smalltalk.send(anAuth, "_at_put_", ["socket_type", smalltalk.send(aSocket, "_socketType", [])]);
     mMsg = smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [anAuth]);
-    mMsgObj = smalltalk.send(aSocket, "_constructMessage_with_", [mMsg, "connect"]);
+    mMsgObj = smalltalk.send(aSocket, "_constructMessage_type_", [mMsg, "connect"]);
     mMsg = smalltalk.send(smalltalk.JSON || JSON, "_stringify_", [mMsgObj]);
-    smalltalk.send(self, "_send_", [mMsg]);
-    return self;
+    $1 = smalltalk.send(self, "_send_", [mMsg]);
+    return $1;
 },
 args: ["aSocket", "aZMQConnString", "anAuth"],
-source: "connect: aSocket url: aZMQConnString auth: anAuth\x0a\x09\x0a    | mMsg mMsgObj |\x0a    \x0a    anAuth at: 'zmq_conn_string' put: aZMQConnString.\x0a    anAuth at: 'socket_type' put: aSocket socketType.\x0a    \x0a    mMsg := JSON stringify: anAuth.\x0a    mMsgObj :=  aSocket constructMessage: mMsg with: 'connect'.\x0a    mMsg :=  JSON stringify: mMsgObj.\x0a    \x0a    self send: mMsg",
-messageSends: ["at:put:", "socketType", "stringify:", "constructMessage:with:", "send:"],
+source: "connect: aSocket url: aZMQConnString auth: anAuth\x0a\x09\x0a    | mMsg mMsgObj |\x0a    \x0a    anAuth at: 'zmq_conn_string' put: aZMQConnString.\x0a    anAuth at: 'socket_type' put: aSocket socketType.\x0a    \x0a    mMsg := JSON stringify: anAuth.\x0a    mMsgObj :=  aSocket constructMessage: mMsg type: 'connect'.\x0a    mMsg :=  JSON stringify: mMsgObj.\x0a\x0a    ^self send: mMsg",
+messageSends: ["at:put:", "socketType", "stringify:", "constructMessage:type:", "send:"],
 referencedClasses: ["JSON"]
 }),
 smalltalk.ZMQContext);
@@ -59,11 +60,13 @@ selector: "connected",
 category: 'not yet classified',
 fn: function () {
     var self = this;
-    return self['@connected'];
+    var $1;
+    $1 = smalltalk.send(self['@s'], "_at_", ["connected"]);
+    return $1;
 },
 args: [],
-source: "connected\x0a\x0a\x09^connected",
-messageSends: [],
+source: "connected\x0a\x0a\x09^ s at: 'connected'",
+messageSends: ["at:"],
 referencedClasses: []
 }),
 smalltalk.ZMQContext);
@@ -75,12 +78,12 @@ selector: "connected:",
 category: 'not yet classified',
 fn: function (aBoolean) {
     var self = this;
-    self['@connected'] = aBoolean;
+    smalltalk.send(self['@s'], "_at_put_", ["connected", aBoolean]);
     return self;
 },
 args: ["aBoolean"],
-source: "connected: aBoolean\x0a\x0a\x09connected := aBoolean",
-messageSends: [],
+source: "connected: aBoolean\x0a\x0a\x09s at: 'connected' put: aBoolean",
+messageSends: ["at:put:"],
 referencedClasses: []
 }),
 smalltalk.ZMQContext);
@@ -199,13 +202,12 @@ fn: function (aWSConnectionURL) {
     smalltalk.send(self, "_try_catch_", [function () {self['@s'] = new WebSocket(aWSConnectionURL);return self['@s'];}, function () {self['@s'] = new MozWebSocket(aWSConnectionURL);return self['@s'];}]);
     smalltalk.send(self['@s'], "_at_put_", ["onmessage", smalltalk.send(self, "_onMessageWSOverrideBlock", [])]);
     smalltalk.send(self['@s'], "_at_put_", ["onopen", smalltalk.send(self, "_onOpenWSOverrideBlock", [])]);
-    smalltalk.send(self, "_connected_", [false]);
     smalltalk.send(self, "_sendBuffer_", [smalltalk.send(smalltalk.Array || Array, "_new", [])]);
     return self;
 },
 args: ["aWSConnectionURL"],
-source: "initializeOnURL: aWSConnectionURL\x0a\x0a    self try: [s := <new WebSocket(aWSConnectionURL)>] \x0a    \x09  catch: [s := <new MozWebSocket(aWSConnectionURL)>].\x0a    \x0a    s at: 'onmessage' put: self onMessageWSOverrideBlock.\x0a    s at: 'onopen' put: self onOpenWSOverrideBlock.\x0a                         \x0a    self connected: false.\x0a    self sendBuffer: Array new.",
-messageSends: ["try:catch:", "at:put:", "onMessageWSOverrideBlock", "onOpenWSOverrideBlock", "connected:", "sendBuffer:", "new"],
+source: "initializeOnURL: aWSConnectionURL\x0a\x0a    self try: [s := < new WebSocket(aWSConnectionURL)>] \x0a    \x09  catch: [s := < new MozWebSocket(aWSConnectionURL)>].\x0a    \x0a    s at: 'onmessage' put: self onMessageWSOverrideBlock.\x0a    s at: 'onopen' put: self onOpenWSOverrideBlock.\x0a                         \x0a    self sendBuffer: Array new.",
+messageSends: ["try:catch:", "at:put:", "onMessageWSOverrideBlock", "onOpenWSOverrideBlock", "sendBuffer:", "new"],
 referencedClasses: ["Array"]
 }),
 smalltalk.ZMQContext);
@@ -235,12 +237,12 @@ category: 'not yet classified',
 fn: function () {
     var self = this;
     var $2, $3, $1;
-    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(msg, "_data", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_primHandle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq_eq_eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
+    $1 = function (msg) {var mMsgObj;var mSocket;mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(smalltalk.send(msg, "_data", []), "_inspect", [])]);mSocket = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_", [smalltalk.send(mMsgObj, "_at_", ["identity"])]);$2 = smalltalk.send(mSocket, "_connected", []);if (smalltalk.assert($2)) {return smalltalk.send(mSocket, "_primHandle_", [smalltalk.send(mMsgObj, "_at_", ["content"])]);} else {$3 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["msg_type"]), "__eq", ["connection_reply"]);if (smalltalk.assert($3)) {return smalltalk.send(self, "_onconnect_message_", [mSocket, smalltalk.send(mMsgObj, "_at_", ["content"])]);}}};
     return $1;
 },
 args: [],
-source: "onMessageWSOverrideBlock\x0a\x0a\x09^ [: msg |    | mMsgObj mSocket |\x0a                      \x0a                    mMsgObj := JSON parse: msg data .\x0a    \x0a\x09 \x09\x09\x09\x09mSocket := (self sockets at: (mMsgObj at: 'identity')).\x0a     \x0a\x09\x09\x09\x09\x09mSocket connected\x0a    \x09\x09\x09\x09\x09\x09ifTrue:[  mSocket  primHandle: (mMsgObj at:'content')]\x0a\x09\x09\x09\x09\x09\x09\x09ifFalse:[  ((mMsgObj at: 'msg_type' ) === 'connection_reply')\x0a        \x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].\x0a                          \x0a        ].\x0a                         \x0a                         ",
-messageSends: ["parse:", "data", "at:", "sockets", "ifTrue:ifFalse:", "primHandle:", "ifTrue:", "onconnect:message:", "===", "connected"],
+source: "onMessageWSOverrideBlock\x0a\x0a\x09^ [: msg |    | mMsgObj mSocket |\x0a                      \x0a                    mMsgObj := JSON parse: msg data inspect.\x0a    \x0a\x09 \x09\x09\x09\x09mSocket := (self sockets at: (mMsgObj at: 'identity')).\x0a     \x0a\x09\x09\x09\x09\x09mSocket connected\x0a    \x09\x09\x09\x09\x09\x09ifTrue:[  mSocket  primHandle: (mMsgObj at:'content')]\x0a\x09\x09\x09\x09\x09\x09\x09ifFalse:[  ((mMsgObj at: 'msg_type' ) = 'connection_reply')\x0a        \x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09\x09ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].\x0a                          \x0a        ].\x0a                         \x0a                         ",
+messageSends: ["parse:", "inspect", "data", "at:", "sockets", "ifTrue:ifFalse:", "primHandle:", "ifTrue:", "onconnect:message:", "=", "connected"],
 referencedClasses: ["JSON"]
 }),
 smalltalk.ZMQContext);
@@ -253,13 +255,13 @@ category: 'not yet classified',
 fn: function () {
     var self = this;
     var $1;
-    $1 = function () {smalltalk.send(self, "_connected_", [true]);smalltalk.send(self, "_map_block_", [smalltalk.send(self, "_sendBuffer", []), function (x) {return smalltalk.send(smalltalk.send(self, "_s", []), "_send_", [x]);}]);return smalltalk.send(self, "_sendBuffer_", [smalltalk.send(smalltalk.Array || Array, "_new", [])]);};
+    $1 = function () {smalltalk.send(self, "_connected_", [true]);smalltalk.send(self, "_map_block_", [smalltalk.send(self, "_sendBuffer", []), function (x) {return smalltalk.send(self['@s'], "_send_", [x]);}]);return smalltalk.send(self, "_sendBuffer_", [smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", [])]);};
     return $1;
 },
 args: [],
-source: "onOpenWSOverrideBlock\x0a\x0a\x09^ [                     \x0a          \x09 self connected: true.\x0a             \x0a\x09\x09\x09self map: self sendBuffer block: [:x  | self s send: x. ].\x0a\x09\x09\x09   \x0a\x09\x09\x09self sendBuffer: Array new.\x0a                          \x0a        ].\x0a                         \x0a                         ",
-messageSends: ["connected:", "map:block:", "sendBuffer", "send:", "s", "sendBuffer:", "new"],
-referencedClasses: ["Array"]
+source: "onOpenWSOverrideBlock\x0a\x0a\x09^ [                     \x0a          \x09 self connected: true.\x0a             \x0a\x09\x09\x09self map: self sendBuffer block: [:x  |  s send: x. ].\x0a\x09\x09\x09   \x0a\x09\x09\x09self sendBuffer: Dictionary new.\x0a                          \x0a        ].\x0a                         \x0a                         ",
+messageSends: ["connected:", "map:block:", "sendBuffer", "send:", "sendBuffer:", "new"],
+referencedClasses: ["Dictionary"]
 }),
 smalltalk.ZMQContext);
 
@@ -272,8 +274,8 @@ fn: function (aSocket, aMessage) {
     var self = this;
     var $1;
     var mMsgObj;
-    mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [aMessage]);
-    $1 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["status"]), "__eq_eq_eq", ["success"]);
+    mMsgObj = smalltalk.send(smalltalk.JSON || JSON, "_parse_", [smalltalk.send(aMessage, "_inspect", [])]);
+    $1 = smalltalk.send(smalltalk.send(mMsgObj, "_at_", ["status"]), "__eq", ["success"]);
     if (smalltalk.assert($1)) {
         smalltalk.send(aSocket, "_connected_", [true]);
     } else {
@@ -282,8 +284,8 @@ fn: function (aSocket, aMessage) {
     return self;
 },
 args: ["aSocket", "aMessage"],
-source: "onconnect: aSocket message: aMessage \x0a\x09\x0a    | mMsgObj |\x0a    \x0a  mMsgObj := JSON parse: aMessage. \x0a  \x0a  ((mMsgObj at: 'status') === 'success')\x0a  \x09\x09ifTrue:[aSocket connected: true]\x0a      \x09ifFalse:[aSocket connected: false]\x0a  \x09",
-messageSends: ["parse:", "ifTrue:ifFalse:", "connected:", "===", "at:"],
+source: "onconnect: aSocket message: aMessage \x0a\x09\x0a    | mMsgObj |\x0a    \x0a  mMsgObj := JSON parse: aMessage inspect. \x0a  \x0a  ((mMsgObj at: 'status') = 'success')\x0a  \x09\x09ifTrue:[aSocket connected: true]\x0a      \x09ifFalse:[aSocket connected: false]\x0a  \x09",
+messageSends: ["parse:", "inspect", "ifTrue:ifFalse:", "connected:", "=", "at:"],
 referencedClasses: ["JSON"]
 }),
 smalltalk.ZMQContext);
@@ -296,12 +298,12 @@ category: 'not yet classified',
 fn: function (aZMQSocket) {
     var self = this;
     var $1;
-    $1 = smalltalk.send(smalltalk.send(self, "_sockets", []), "_at_put_", [smalltalk.send(aZMQSocket, "_identity", []), aZMQSocket]);
+    $1 = smalltalk.send(smalltalk.send(self, "_zmqSockets", []), "_at_put_", [smalltalk.send(aZMQSocket, "_identity", []), aZMQSocket]);
     return $1;
 },
 args: ["aZMQSocket"],
-source: "registerNewSocket: aZMQSocket\x0a\x0a\x09   ^self sockets at: aZMQSocket identity put: aZMQSocket\x0a",
-messageSends: ["at:put:", "identity", "sockets"],
+source: "registerNewSocket: aZMQSocket\x0a\x0a\x09   ^self zmqSockets at: aZMQSocket identity put: aZMQSocket\x0a",
+messageSends: ["at:put:", "identity", "zmqSockets"],
 referencedClasses: []
 }),
 smalltalk.ZMQContext);
@@ -313,18 +315,18 @@ selector: "send:",
 category: 'not yet classified',
 fn: function (aMessage) {
     var self = this;
-    var $1;
-    $1 = smalltalk.send(self, "_connected", []);
-    if (smalltalk.assert($1)) {
-        smalltalk.send(self['@s'], "_send_", [aMessage]);
+    var $2, $1;
+    $2 = smalltalk.send(self, "_connected", []);
+    if (smalltalk.assert($2)) {
+        $1 = smalltalk.send(self['@s'], "_send_", [aMessage]);
     } else {
-        smalltalk.send(smalltalk.send(self, "_sendBuffer", []), "_push_", [aMessage]);
+        $1 = smalltalk.send(smalltalk.send(self, "_sendBuffer", []), "_add_", [aMessage]);
     }
-    return self;
+    return $1;
 },
 args: ["aMessage"],
-source: "send: aMessage\x0a\x0a\x09self connected \x0a    \x09ifTrue:[ s send: aMessage ]\x0a        ifFalse:[ self sendBuffer push: aMessage ]\x0a    \x0a\x09",
-messageSends: ["ifTrue:ifFalse:", "send:", "push:", "sendBuffer", "connected"],
+source: "send: aMessage\x0a\x0a   ^ self connected\x0a      ifTrue:[ s send: aMessage]\x0a      ifFalse:[self sendBuffer add: aMessage]",
+messageSends: ["ifTrue:ifFalse:", "send:", "add:", "sendBuffer", "connected"],
 referencedClasses: []
 }),
 smalltalk.ZMQContext);
@@ -638,17 +640,36 @@ smalltalk.ZMQPubRPCServer);
 
 smalltalk.addClass('ZMQSocket', smalltalk.Object, ['zmqContext', 'identity'], 'ZMQ-Support-Core');
 smalltalk.addMethod(
+"_connect_",
+smalltalk.method({
+selector: "connect:",
+category: 'not yet classified',
+fn: function (aZMQConnString) {
+    var self = this;
+    var $1;
+    $1 = smalltalk.send(self, "_connect_auth_", [aZMQConnString, smalltalk.send(smalltalk.Dictionary || Dictionary, "_new", [])]);
+    return $1;
+},
+args: ["aZMQConnString"],
+source: "connect: aZMQConnString\x0a\x0a  ^self connect: aZMQConnString auth: Dictionary new",
+messageSends: ["connect:auth:", "new"],
+referencedClasses: ["Dictionary"]
+}),
+smalltalk.ZMQSocket);
+
+smalltalk.addMethod(
 "_connect_auth_",
 smalltalk.method({
 selector: "connect:auth:",
 category: 'not yet classified',
 fn: function (aZMQConnString, anAuth) {
     var self = this;
-    smalltalk.send(smalltalk.send(self, "_zmqContext", []), "_connect_url_auth_", [self, aZMQConnString, anAuth]);
-    return self;
+    var $1;
+    $1 = smalltalk.send(smalltalk.send(self, "_zmqContext", []), "_connect_url_auth_", [self, aZMQConnString, anAuth]);
+    return $1;
 },
 args: ["aZMQConnString", "anAuth"],
-source: "connect: aZMQConnString auth: anAuth\x0a\x0a  self zmqContext connect: self  url: aZMQConnString auth: anAuth",
+source: "connect: aZMQConnString auth: anAuth\x0a\x0a  ^self zmqContext connect: self  url: aZMQConnString auth: anAuth",
 messageSends: ["connect:url:auth:", "zmqContext"],
 referencedClasses: []
 }),

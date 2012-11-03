@@ -20,7 +20,7 @@ generateUUID
 ! !
 
 Object subclass: #ZMQContext
-	instanceVariableNames: 's zmqSockets connected sendBuffer'
+	instanceVariableNames: 's zmqSockets sendBuffer'
 	package: 'ZMQ-Support-Core'!
 
 !ZMQContext methodsFor: 'not yet classified'!
@@ -33,20 +33,20 @@ connect: aSocket url: aZMQConnString auth: anAuth
     anAuth at: 'socket_type' put: aSocket socketType.
     
     mMsg := JSON stringify: anAuth.
-    mMsgObj :=  aSocket constructMessage: mMsg with: 'connect'.
+    mMsgObj :=  aSocket constructMessage: mMsg type: 'connect'.
     mMsg :=  JSON stringify: mMsgObj.
-    
-    self send: mMsg
+
+    ^self send: mMsg
 !
 
 connected
 
-	^connected
+	^ s at: 'connected'
 !
 
 connected: aBoolean
 
-	connected := aBoolean
+	s at: 'connected' put: aBoolean
 !
 
 createNewRepSocket
@@ -85,13 +85,12 @@ initialize
 
 initializeOnURL: aWSConnectionURL
 
-    self try: [s := <new WebSocket(aWSConnectionURL)>] 
-    	  catch: [s := <new MozWebSocket(aWSConnectionURL)>].
+    self try: [s := < new WebSocket(aWSConnectionURL)>] 
+    	  catch: [s := < new MozWebSocket(aWSConnectionURL)>].
     
     s at: 'onmessage' put: self onMessageWSOverrideBlock.
     s at: 'onopen' put: self onOpenWSOverrideBlock.
                          
-    self connected: false.
     self sendBuffer: Array new.
 !
 
@@ -104,13 +103,13 @@ onMessageWSOverrideBlock
 
 	^ [: msg |    | mMsgObj mSocket |
                       
-                    mMsgObj := JSON parse: msg data .
+                    mMsgObj := JSON parse: msg data inspect.
     
 	 				mSocket := (self sockets at: (mMsgObj at: 'identity')).
      
 					mSocket connected
     						ifTrue:[  mSocket  primHandle: (mMsgObj at:'content')]
-							ifFalse:[  ((mMsgObj at: 'msg_type' ) === 'connection_reply')
+							ifFalse:[  ((mMsgObj at: 'msg_type' ) = 'connection_reply')
         												ifTrue:[ self onconnect: mSocket message: (mMsgObj at: 'content')] ].
                           
         ].
@@ -121,9 +120,9 @@ onOpenWSOverrideBlock
 	^ [                     
           	 self connected: true.
              
-			self map: self sendBuffer block: [:x  | self s send: x. ].
+			self map: self sendBuffer block: [:x  |  s send: x. ].
 			   
-			self sendBuffer: Array new.
+			self sendBuffer: Dictionary new.
                           
         ].
 !
@@ -132,23 +131,23 @@ onconnect: aSocket message: aMessage
 	
     | mMsgObj |
     
-  mMsgObj := JSON parse: aMessage. 
+  mMsgObj := JSON parse: aMessage inspect. 
   
-  ((mMsgObj at: 'status') === 'success')
+  ((mMsgObj at: 'status') = 'success')
   		ifTrue:[aSocket connected: true]
       	ifFalse:[aSocket connected: false]
 !
 
 registerNewSocket: aZMQSocket
 
-	   ^self sockets at: aZMQSocket identity put: aZMQSocket
+	   ^self zmqSockets at: aZMQSocket identity put: aZMQSocket
 !
 
 send: aMessage
 
-	self connected 
-    	ifTrue:[ s send: aMessage ]
-        ifFalse:[ self sendBuffer push: aMessage ]
+   ^ self connected
+      ifTrue:[ s send: aMessage]
+      ifFalse:[self sendBuffer add: aMessage]
 !
 
 sendBuffer
@@ -294,9 +293,14 @@ Object subclass: #ZMQSocket
 
 !ZMQSocket methodsFor: 'not yet classified'!
 
+connect: aZMQConnString
+
+  ^self connect: aZMQConnString auth: Dictionary new
+!
+
 connect: aZMQConnString auth: anAuth
 
-  self zmqContext connect: self  url: aZMQConnString auth: anAuth
+  ^self zmqContext connect: self  url: aZMQConnString auth: anAuth
 !
 
 constructMessage: aMessage

@@ -4,13 +4,16 @@
 <script src="../../js/amber.js" type="text/javascript"></script>
 </head>
 <body>
+	<p>test <button onClick="smalltalk.Browser._openOn_(smalltalk.ZMQReqSubExample)"> Browser</button></p>
+
 <script type="text/javascript"> 
 	loadAmber({
-		files: ['ZMQ-Support-Core.js'],
+		files: ['ZMQ-Support-Example,js','ZMQ-Support-Core.js'],
 		prefix: 'examples/amber-zeroMQ/js',
-		packages: ['ZMQ-Support-Core'],
+		packages: ['ZMQ-Support-Example','ZMQ-Support-Core'],
 		ready: function() {
-			smalltalk.Browser._open();
+
+			smalltalk.ZMQReqSubExample._open();
 		}}); 
 </script>
 </body>
